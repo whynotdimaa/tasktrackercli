@@ -34,7 +34,9 @@ class Task:
     )
 class TaskManager:
     def __init__(self, filepath):
-        self.tasks = []
+        with open(filepath) as f:
+           data = json.load(f)
+        self.tasks = [Task.from_dict(t) for t in data]
         self.filepath = Path(filepath)
         try:
             with open(self.filepath) as json_file:
@@ -51,11 +53,34 @@ class TaskManager:
 
         new_task = Task(new_id, description, "todo", now, now)
         self.tasks.append(new_task)
+        self.save()
 
         with open (self.filepath, 'w') as f:
             json.dump([t.to_dict() for t in self.tasks], f)
         print("Task added")
-    def removetasks(self , description):
+    def updatetasks(self ,id , new_description):
+        for task in self.tasks:
+            if task.id == id:
+                task.description = new_description
+                task.update()
+                print(f"Task {task.id} updated")
+                return
+        print("Task not found")
+    def deletetasks(self , id):
+        for task in self.tasks:
+            if task.id == id:
+                self.tasks.remove(task)
+                print(f"Task {id} deleted")
+                return
+        print("Task not found")
+    def save(self):
+        with open(self.filepath, 'w') as f:
+            json.dump([t.to_dict() for t in self.tasks], f, ensure_ascii=False)
+        print("Task saved")
+
+
+
+
 
 
 
